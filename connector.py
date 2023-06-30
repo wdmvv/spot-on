@@ -1,5 +1,5 @@
 '''
-Module that is basically a bridge between cli args -> spotify.py -> download.py
+Module that is basically a bridge between main.py -> spotify.py -> download.py
 It handles:
     Input link/id parsing
     Spotify connection
