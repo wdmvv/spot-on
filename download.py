@@ -34,7 +34,8 @@ class Downloader:
             #'logger': logging.Logger,
             'quiet': True
         }
-
+        #structure for saving album covers as album_name - imgpath
+        self.album_covers = {}
         self.ytdlp_opts = opts
         self.download_path = f'{download_path}'
 
@@ -43,6 +44,8 @@ class Downloader:
     def batch_download(self, tracks: list[spotify.Track]):
         for i in tracks:
             self.download_track(i)
+        logging.info(f'Cleaning up...')
+        self.__cleanup()
 
     def download_track(self, track: spotify.Track):
         artists = ", ".join(track.track_artists)
@@ -63,22 +66,25 @@ class Downloader:
         logging.info(f'Downloaded track {track.track_name}')
 
     #needed for track cover
-    def __download_image(self, link, track_name):
-        filename = link.split('/')[-1]
-        resp = requests.get(link)
-        imgpath = os.path.join(self.download_path, filename) + '.jpg'
+    def __get_album_image(self, track: spotify.Track):
+        if track.album_name not in self.album_covers:
+            filename = track.image_url.split('/')[-1]
+            resp = requests.get(track.image_url)
+            imgpath = os.path.join(self.download_path, filename) + '.jpg'
 
-        if resp.status_code == 200:
-            with open(imgpath, 'wb') as f:
-                f.write(resp.content)
-        else:
-            logging.error(f'Failed to download cover image for {track_name}')
-            return None
+            if resp.status_code == 200:
+                with open(imgpath, 'wb') as f:
+                    f.write(resp.content)
+            else:
+                logging.error(f'Failed to download cover image for {track.track_name}')
+                return None
+            
+            self.album_covers[track.album_name] = imgpath
 
-        return imgpath
+        return self.album_covers[track.album_name]
     
     def change_metadata(self, filepath, track: spotify.Track):
-        imgpath = self.__download_image(track.image_url, track.track_name)
+        imgpath = self.__get_album_image(track)
         f = music_tag.load_file(filepath + '.mp3')
         if not f:
             logging.error(f'Failed to change metadata for {track.track_name} at {filepath}')
@@ -92,7 +98,12 @@ class Downloader:
             else:
                 logging.error(f'Failed to set album cover for {track.track_name}')
             f.save()
-        if imgpath:
-            os.remove(imgpath)
+
+    #removing all album covers after downloading tracks
+    def __cleanup(self):
+        for i in self.album_covers:
+            os.remove(self.album_covers[i])
+        self.album_covers = {}
+
 
 

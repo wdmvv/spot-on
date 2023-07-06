@@ -12,8 +12,9 @@ import download
 
 
 class Connector:
-    def __init__(self, link, download_path, spotify_: spotify.Spotify):
-        self.playlist_id = self.get_id(link)
+    def __init__(self, type, link, download_path, spotify_: spotify.Spotify):
+        self.download_id = self.get_id(link)
+        self.type = type
 
         self.downloader = download.Downloader(download_path)
         self.spotify_ = spotify_
@@ -21,12 +22,19 @@ class Connector:
         self.process()
 
     def get_id(self, link):
-        playlist_id = utils.parse(link)
-        return playlist_id
+        download_id = utils.parse(link)
+        return download_id
 
     def process(self):
-        tracks = self.spotify_.get_playlist_tracks(self.playlist_id)
-        playlist = spotify.build_playlist(tracks)
-        self.downloader.batch_download(playlist)
+        match self.type:
+            case 'playlist':
+                tracks = self.spotify_.get_playlist_tracks(self.download_id)
+                todownload = spotify.build_pl_from_pl(tracks)
+                self.downloader.batch_download(todownload)
+            case 'album':
+                tracks = self.spotify_.get_album_tracks(self.download_id)
+                album = self.spotify_.get_album_info(self.download_id)
+                todownload = spotify.build_pl_from_al(tracks, album)
+                self.downloader.batch_download(todownload)
 
         
