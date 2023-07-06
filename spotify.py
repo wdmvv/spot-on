@@ -67,43 +67,65 @@ class Spotify:
 
         resp = requests.get(url, headers=self.header)
         if resp.status_code != 200:
-            logging.fatal(f'Failed to fetch tracks for {playlist_id}')
+            logging.fatal(f'Failed to fetch playlist tracks for {playlist_id}')
 
         resp_json = json.loads(resp.content)
         out.append(resp_json)
 
-        if resp_json['total'] <= 100:
-            return out
-        else:
+        if resp_json['total'] > 100:
             for i in range(1, resp_json['total'] // 100 + (resp_json['total'] % 100 > 0)):                
                 url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?offset={i * 100}&limit=100'
                 resp = requests.get(url, headers=self.header)
 
                 if resp.status_code != 200:
-                    logging.fatal(f'Failed to fetch tracks for {playlist_id}')
+                    logging.fatal(f'Failed to fetch playlist tracks for {playlist_id}')
 
                 resp_json = json.loads(resp.content)
                 out.append(resp_json)
-            return out
+        return out
+    
+    #function's literally get_playlist_tracks, only url was changed, must make it less boilerplate-ish later
+    def get_album_tracks(self, album_id) -> list[dict]:
+        out = []
 
-'''
-Interface for each track, contains most information about track
-Base response json endpoints:
-response -> "items": [] - array of dicts
-                "track"
-                    "name" - track name #
-                    "album"
-                        "name" - album name #
-                        "images" - array of dicts
-                            0th element
-                                "url" - album image url in 640px #
-                        "artists": [] - array of dicts
-                            "name" - album artist name #
-                    "arists": [] - array of dicts
-                        "name" - track artist name #
-                    "duration_ms" - duration for filtering #
+        url = f'https://api.spotify.com/v1/albums/{album_id}/tracks?offset=0&limit=50'
 
-'''
+        resp = requests.get(url, headers=self.header)
+        if resp.status_code != 200:
+            logging.fatal(f'Failed to fetch album tracks for {album_id}')
+
+        resp_json = json.loads(resp.content)
+        out.append(resp_json)
+
+        if resp_json['total'] > 50:
+            for i in range(1, resp_json['total'] // 50 + (resp_json['total'] % 50 > 0)):                
+                url = f'https://api.spotify.com/v1/albums/{album_id}/tracks?offset={i * 50}&limit=50'
+                resp = requests.get(url, headers=self.header)
+
+                if resp.status_code != 200:
+                    logging.fatal(f'Failed to fetch album tracks for {album_id}')
+
+                resp_json = json.loads(resp.content)
+                out.append(resp_json)
+        return out
+
+    #information about album itself, provides name, image url, artists
+    def get_album_info(self, album_id):
+        url = f'https://api.spotify.com/v1/albums/{album_id}'
+
+        resp = requests.get(url, headers=self.header)
+        if resp.status_code != 200:
+            logging.fatal(f'Failed to fetch information for album {album_id}')
+
+        resp_json = json.loads(resp.content)
+        artists = [i['name'] for i in resp_json['artists']]
+        album = Album(
+            resp_json['name'],
+            artists,
+            resp_json['images'][0]['url'],
+        )
+        return album
+
 class Track:
     def __init__(self,
         track_name: str,
@@ -120,16 +142,26 @@ class Track:
         self.track_artists = track_artists
         self.duration_s = duration_s
 
+#Not needed that much but I thought it is better than passing same 3 arguments separately
+class Album:
+    def __init__(self,
+        name: str,
+        artists: list[str],
+        image_url: str,
+        ):
 
-#Wrapper for __playlist_builder to handle get_playlist_tracks() response list
-def build_playlist(responses: list[dict]) -> list[Track]:
+        self.name = name
+        self.artists = artists
+        self.image_url = image_url
+
+
+def build_pl_from_pl(responses: list[dict]) -> list[Track]:
     out = []
     for resp in responses:
-        out.extend(__playlist_builder(resp))
+        out.extend(__tracks_playlist_builder(resp))
     return out
 
-#Function for building list[Track] for further work, accepts json response from https://api.spotify.com/v1/playlists/{playlist_id}/tracks
-def __playlist_builder(response) -> list[Track]:
+def __tracks_playlist_builder(response) -> list[Track]:
     out = []
     for item in response['items']:
 
@@ -157,3 +189,34 @@ def __playlist_builder(response) -> list[Track]:
             duration_s=duration_s
         ))
     return out
+
+def build_pl_from_al(responses: list[dict], album: Album) -> list[Track]:
+    out = []
+    for resp in responses:
+        out.extend(__tracks_album_builder(resp, album))
+    return out
+
+def __tracks_album_builder(response, album: Album) -> list[Track]:
+    out = []
+    for item in response['items']:
+        
+        name = item['name']
+
+        track_artists = []
+        for art in item['artists']:
+            track_artists.append(art['name'])
+        
+        duration_ms = item['duration_ms']
+        duration_s = utils.ms_to_s(duration_ms)
+
+        out.append(Track(
+            track_name=name,
+            album_name=album.name,
+            image_url=album.image_url,
+            album_artists=album.artists,
+            track_artists=track_artists,
+            duration_s=duration_s
+        ))
+
+    return out
+    

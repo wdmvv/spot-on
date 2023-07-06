@@ -1,0 +1,4 @@
+music_tag==0.4.3
+python-dotenv==1.0.0
+Requests==2.31.0
+yt_dlp==2023.3.4
