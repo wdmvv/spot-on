@@ -1,7 +1,8 @@
 # spot-on
 Cli tool for downloading spotify tracks from youtube<br>
 As of now, supports playlist & album downloads<br>
-Results may be invalid, make sure to double check downloads<br>
+Results may be invalid, make sure to double check downloads(currently works for most genres, although classical music results are bad)<br>
+
 
 # Installation
 ```
