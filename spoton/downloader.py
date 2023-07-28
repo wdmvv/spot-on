@@ -23,7 +23,9 @@ class Downloader:
             'postprocessor_args': ['-hide_banner'],
             'geo_bypass': True,
             'overwrites': True,
-            'quiet': True
+            'quiet': True,
+            'cookies-from-browser': 'chrome',
+            'user-agent': 'US'
         }
 
         #structure for saving album covers as album_name: imgpath
@@ -70,6 +72,8 @@ class Downloader:
                 f['discnumber'] = track.disk_number
             if track.track_number:
                 f['tracknumber'] = track.track_number
+            if track.total_tracks:
+                f['totaltracks'] = track.total_tracks
 
             f.save()
     

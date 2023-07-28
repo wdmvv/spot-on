@@ -115,11 +115,13 @@ class Spotify:
 
         resp_json = json.loads(resp.content)
         artists = [i['name'] for i in resp_json['artists']]
+        total_tracks = resp_json['total_tracks']
 
         album = structs.Album(
-            resp_json['name'],
-            artists,
-            resp_json['images'][0]['url'],
+            name=resp_json['name'],
+            artists=artists,
+            image_url=resp_json['images'][0]['url'],
+            total_tracks=total_tracks
         )
 
         return album

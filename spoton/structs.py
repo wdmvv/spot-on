@@ -10,11 +10,13 @@ class Album:
         name: str,
         artists: list[str],
         image_url: str,
+        total_tracks: int,
         ):
 
         self.name = name
         self.artists = artists
         self.image_url = image_url
+        self.total_tracks = total_tracks
 
 class Track:
     def __init__(self,
@@ -24,7 +26,8 @@ class Track:
         album_artists: list[str],
         track_artists: list[str],
         disk_number=None,
-        track_number=None):
+        track_number=None,
+        total_tracks=None):
 
         self.track_name = track_name
         self.album_name = album_name
@@ -33,6 +36,7 @@ class Track:
         self.track_artists = track_artists
         self.disk_number = disk_number
         self.track_number = track_number
+        self.total_tracks = total_tracks
 
 
 def tracks_from_playlist(responses: list[dict]) -> list[Track]:
@@ -77,8 +81,9 @@ def __album_tracks_builder(response, album: Album) -> list[Track]:
     for item in response['items']:
         name = item['name']
 
-        track_number = item['track_number']
-        disk_number = item['disk_number']
+        track_number = item['track_number'] if 'track_number' in item else None
+        total_tracks = album.total_tracks
+        disk_number = item['disk_number'] if 'disk_number' in item else None
 
         track_artists = []
         for art in item['artists']:
@@ -91,7 +96,8 @@ def __album_tracks_builder(response, album: Album) -> list[Track]:
             album_artists=album.artists,
             track_artists=track_artists,
             disk_number=disk_number,
-            track_number=track_number
+            track_number=track_number,
+            total_tracks=total_tracks
         ))
 
     return tracks
