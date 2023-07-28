@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```
 
 # Usage:
-python3.11 main.py type link download_path<br>
+python3.11 main.py [type] link [download_path]<br>
 <ul>
   <li>type - defines what should it download - album or playlist, playlist by default</li>
   <li>link - download link - can be either full path link or just id</li>
@@ -20,5 +20,5 @@ python3.11 main.py type link download_path<br>
 
 # TBD
 <ul>
-  <li>Change defaut sound quality (best right now)</li>
+  <li>Add precision search based on duration</li>
 </ul>

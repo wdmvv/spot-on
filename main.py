@@ -1,12 +1,7 @@
-import logging
 import dotenv, os
-
-import logs
 import cliargs
-import spotify
-import connector
+from spoton.connector import Connector
 
-logs.Logger()
 
 parser = cliargs.cli_init()
 args = parser.parse_args()
@@ -14,22 +9,23 @@ args = parser.parse_args()
 env = dotenv.load_dotenv()
 
 if not env:
-    f = open('.env', 'w')
-    f.write('CLIENT_ID=\n')
-    f.write('CLIENT_SECRET=')
-    f.close()
-    logging.fatal('.env was not detected, creating it - fill in CLIENT_ID and CLIENT_SECRET')
+    with open('.env', 'w') as f:
+        f.write('CLIENT_ID=\nCLIENT_SECRET=')
+
+    print('.env was not detected, creating it - fill in CLIENT_ID and CLIENT_SECRET')
+    os._exit(1)
+
 
 client_id = os.getenv('CLIENT_ID')
 client_secret = os.getenv('CLIENT_SECRET')
 
-#very h, really
-spotify_ = spotify.Spotify(client_id, client_secret)
+if not(client_id and client_secret):
+    print('Failed to parse .env file, check validity')
+    os._exit(1)
 
-#Download type, album or playlist
-#I know it should not be like this but currently I have no idea how to improve this
 type = args.type
 link = args.link
 download_path = args.download_path
 
-connector.Connector(type, link, download_path, spotify_)
+Connector = Connector(client_id, client_secret)
+Connector.process(type, link, download_path)
