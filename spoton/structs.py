@@ -25,15 +25,18 @@ class Track:
         image_url: str,
         album_artists: list[str],
         track_artists: list[str],
+        duration_ms: int,
         disk_number=None,
         track_number=None,
-        total_tracks=None):
+        total_tracks=None,
+        ):
 
         self.track_name = track_name
         self.album_name = album_name
         self.image_url = image_url
         self.album_artists = album_artists
         self.track_artists = track_artists
+        self.duration_ms = duration_ms
         self.disk_number = disk_number
         self.track_number = track_number
         self.total_tracks = total_tracks
@@ -52,6 +55,7 @@ def __playlist_tracks_builder(response) -> list[Track]:
         name = item['track']['name']
         album_name = item['track']['album']['name']
         image_url = item['track']['album']['images'][0]['url']
+        duration_ms = item['track']['duration_ms']
 
         album_artists = []
         for art in item['track']['album']['artists']:
@@ -67,6 +71,7 @@ def __playlist_tracks_builder(response) -> list[Track]:
             image_url=image_url,
             album_artists=album_artists,
             track_artists=track_artists,
+            duration_ms=duration_ms
         ))
     return tracks
 
@@ -80,10 +85,12 @@ def __album_tracks_builder(response, album: Album) -> list[Track]:
     tracks = []
     for item in response['items']:
         name = item['name']
-
+        
         track_number = item['track_number'] if 'track_number' in item else None
         total_tracks = album.total_tracks
         disk_number = item['disk_number'] if 'disk_number' in item else None
+
+        duration_ms = item['duration_ms']
 
         track_artists = []
         for art in item['artists']:
@@ -97,7 +104,8 @@ def __album_tracks_builder(response, album: Album) -> list[Track]:
             track_artists=track_artists,
             disk_number=disk_number,
             track_number=track_number,
-            total_tracks=total_tracks
+            total_tracks=total_tracks,
+            duration_ms=duration_ms
         ))
 
     return tracks

@@ -12,20 +12,34 @@ pip install -r requirements.txt
 ```
 
 # Usage:
-python3.11 main.py [type] link [download_path]<br>
+```
+python3.11 main.py [-h] [--type type] [--path path] [--precise] link
+```
 <ul>
-  <li>type - defines what should it download - album or playlist, playlist by default</li>
-  <li>link - download link - can be either full path link or just id</li>
-  <li>download_path - where should downloads be stored - by default creates 'Downloads' dir in workdir</li>
+  <li>-h - program help</li>
+  <li>--type - download type, must be either 'album' or 'playlist'</li>
+  <li>--path - specify download path, by default creates 'Downloads' dir in workdir</li>
+  <li>--precise - enable precise search. It will work slower, but results will be as close to the spotify's ones as possible</li>
+  <li>link - spotify playlist/album link, can be either id or link</li>
 </ul>
+
+# Examples:
+```
+python3.11 main.py --type album --path 'Infinite Hyperdeath' https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
+```
+  \- will create folder 'Infinite Hyperdeath' and download album into it
+```
+python3.11 main.py --precise https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M
+```
+  \- will create folder 'Downloads' and download playlist filtered by duration  into it
 
 # TBD
 <ul>
-  <li>Add precision search based on duration</li>
+  <li>Add 403 error workaround (given that I find one)</li>
+  <li>Threads</li>
 </ul>
 
 # Known problem(s)
 <ul>
-  <li>Sometimes download may fail with following error: `[download] Got error: HTTP Error 403: Forbidden ytdlp`. I assume this is related to youtube doing something on their side since it used to work previously</li>
-  <li>Some songs have entire album inside instead of single song - I will try to fix this in future (given that I dont forget about this project)</li>
+  <li>Sometimes download may fail with following error: `[download] Got error: HTTP Error 403: Forbidden`. I assume this is related to youtube doing something on their side since it used to work previously, I may find workaround in the future</li>
 </ul>

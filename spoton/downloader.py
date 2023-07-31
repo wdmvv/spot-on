@@ -1,5 +1,9 @@
 '''
     Module for downloading tracks based on list[Track] and swapping metadata after processing
+
+    batch_download - download multiple tracks, precise search or not
+    download_track - casual track download that relies on first youtube search result
+    precise_download - filters by duration and chooses closest one
 '''
 
 import os
@@ -11,7 +15,6 @@ import requests
 
 class Downloader:
     def __init__(self, download_path):
-
         self.ytdlp_options = {
             'default_search': 'ytsearch',
             'format': 'bestaudio/best',
@@ -34,11 +37,14 @@ class Downloader:
         self.download_path = f'{download_path}'
         self.__create_dir(download_path)
 
-    def batch_download(self, tracks: list[structs.Track]):
+    def batch_download(self, tracks: list[structs.Track], precise=False):
+        download_func = self.download_track
+        if precise:
+            download_func = self.precise_download
         for i in tracks:
-            self.download_track(i)
-        self.__cleanup()
-    
+            download_func(i)
+        self.__cleanup()    
+        
     def download_track(self, track: structs.Track):
         artists = ", ".join(track.track_artists)
         request_query = f'{artists} - {track.track_name} song HD'
@@ -51,6 +57,39 @@ class Downloader:
         with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
             ydl.download([request_query])
 
+        self.__change_metadata(savepath, track)
+
+    #has duration filter
+    def precise_download(self, track: structs.Track):
+        artists = ", ".join(track.track_artists)
+        request_query = f'{artists} - {track.track_name} song HD'
+
+        ytdlp_options = self.ytdlp_options
+
+        #to get first 10 results, if it was ytsearch then it would give single one only
+        ytdlp_options['default_search'] = 'ytsearch10'
+
+        duration_s = track.duration_ms // 1000
+
+        with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
+            info = ydl.extract_info(request_query, download=False)
+
+            if not info:
+                raise(Exception(f'Failed to extract data for {track.track_name}'))
+            else:
+                entries = info['entries']
+                entries.sort(key=lambda x, dur=duration_s:(abs(x['duration'] - dur), x['view_count']))
+
+                url = entries[0]['webpage_url']
+        
+        ytdlp_options['default_search'] = 'auto'
+
+        savepath = os.path.join(self.download_path, track.track_name)
+        ytdlp_options['outtmpl'] = savepath
+
+        with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
+            ydl.download([url])
+        
         self.__change_metadata(savepath, track)
 
     def __change_metadata(self, audio_path, track: structs.Track):

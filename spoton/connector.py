@@ -20,7 +20,7 @@ class Connector:
         '''
         self.spotify_obj = spotify.Spotify(client_id, client_secret)
     
-    def process(self, type: str, link: str, download_path: str):
+    def process(self, type: str, link: str, download_path: str, precise: bool):
         download_id = self.get_id(link)
         match type:
             case 'playlist':
@@ -34,7 +34,7 @@ class Connector:
                 raise(Exception('Invalid download type'))
 
         Downloader = downloader.Downloader(download_path)
-        Downloader.batch_download(tracks)
+        Downloader.batch_download(tracks, precise)
 
 
     def get_id(self, link):

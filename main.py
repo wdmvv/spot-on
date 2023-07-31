@@ -25,7 +25,8 @@ if not(client_id and client_secret):
 
 type = args.type
 link = args.link
-download_path = args.download_path
+download_path = args.path
+precise = args.precise
 
 Connector = Connector(client_id, client_secret)
-Connector.process(type, link, download_path)
+Connector.process(type, link, download_path, precise)
