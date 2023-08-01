@@ -10,6 +10,8 @@ git clone https://github.com/wdmvv/spot-on
 cd spot-on
 pip install -r requirements.txt
 ```
+You will also have to obtain spotify app client id and secret. To do that go to the [app creation page](https://developer.spotify.com/dashboard) and create new app. Upon creating, click "Settings" button, copy client id & client secret and put both into .env file
+
 
 # Usage:
 ```
@@ -23,6 +25,7 @@ python3.11 main.py [-h] [--type type] [--path path] [--precise] link
   <li>link - spotify playlist/album link, can be either id or link</li>
 </ul>
 
+
 # Examples:
 ```
 python3.11 main.py --type album --path 'Infinite Hyperdeath' https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
@@ -33,11 +36,13 @@ python3.11 main.py --precise https://open.spotify.com/playlist/37i9dQZF1DXcBWIGo
 ```
   \- will create folder 'Downloads' and download playlist filtered by duration  into it
 
+
 # TBD
 <ul>
   <li>Add 403 error workaround (given that I find one)</li>
   <li>Threads</li>
 </ul>
+
 
 # Known problem(s)
 <ul>
