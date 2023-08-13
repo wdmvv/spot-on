@@ -15,7 +15,7 @@ You will also have to obtain spotify app client id and secret. To do that go to 
 
 # Usage:
 ```
-python3.11 main.py [-h] [--type type] [--path path] [--precise] link
+python3.11 main.py [-h] [--type type] [--path path] [--precise] [--workers number] link
 ```
 <ul>
   <li>-h - program help</li>
