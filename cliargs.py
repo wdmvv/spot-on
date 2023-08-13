@@ -29,10 +29,17 @@ def cli_init():
     )
 
     parser.add_argument('--precise',
-        help='Precise search, might be considerably slower, but results are more precise, False by default',
+        help='Precise search, might be considerably slower, False by default',
         type=bool,
         action=argparse.BooleanOptionalAction,
         #nargs='?'
+    )
+
+    parser.add_argument('--workers',
+    help='Amount of threads to be launched for download, 5 by default',
+        type=int,
+        default=5,
+        nargs='?'
     )
     
     return parser

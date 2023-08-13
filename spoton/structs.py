@@ -4,42 +4,27 @@
         * Parsing list[dict] response from endpoint/playlists or endpoint/albums into list[Track]
         * Building list[Track] from album response requires not only api response with elements in album, but also album info
 '''
+from dataclasses import dataclass
+from typing import Optional
 
+@dataclass
 class Album:
-    def __init__(self,
-        name: str,
-        artists: list[str],
-        image_url: str,
-        total_tracks: int,
-        ):
+    name: str
+    artists: list[str]
+    image_url: str
+    total_tracks: int
 
-        self.name = name
-        self.artists = artists
-        self.image_url = image_url
-        self.total_tracks = total_tracks
-
+@dataclass
 class Track:
-    def __init__(self,
-        track_name: str,
-        album_name: str,
-        image_url: str,
-        album_artists: list[str],
-        track_artists: list[str],
-        duration_ms: int,
-        disk_number=None,
-        track_number=None,
-        total_tracks=None,
-        ):
-
-        self.track_name = track_name
-        self.album_name = album_name
-        self.image_url = image_url
-        self.album_artists = album_artists
-        self.track_artists = track_artists
-        self.duration_ms = duration_ms
-        self.disk_number = disk_number
-        self.track_number = track_number
-        self.total_tracks = total_tracks
+    track_name: str
+    album_name: str
+    image_url: str
+    album_artists: list[str]
+    track_artists: list[str]
+    duration_ms: int
+    disk_number: Optional[int] = None
+    track_number: Optional[int] = None
+    total_tracks: Optional[int] = None
 
 
 def tracks_from_playlist(responses: list[dict]) -> list[Track]:

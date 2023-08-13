@@ -12,62 +12,67 @@ import yt_dlp
 import music_tag
 import requests
 
+import concurrent.futures as cf
 
 class Downloader:
-    def __init__(self, download_path):
+    def __init__(self, download_path: str, workers: int):
         self.ytdlp_options = {
-            'default_search': 'ytsearch',
+            'default_search': 'auto',
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
-            'postprocessor_args': ['-hide_banner'],
             'geo_bypass': True,
-            'overwrites': True,
+            'geo_bypass_country': 'US',
             'quiet': True,
-            'cookies-from-browser': 'chrome',
-            'user-agent': 'US'
+            'noprogress': True,
+            'nooverwrites': True,        
         }
 
         #structure for saving album covers as album_name: imgpath
         self.album_covers = {}
-
         self.download_path = f'{download_path}'
         self.__create_dir(download_path)
+
+
+        self.pool = cf.ThreadPoolExecutor(max_workers=workers)
+
 
     def batch_download(self, tracks: list[structs.Track], precise=False):
         download_func = self.download_track
         if precise:
             download_func = self.precise_download
+
         for i in tracks:
-            download_func(i)
-        self.__cleanup()    
+            self.pool.submit(download_func, i)
+
+        self.pool.shutdown(wait=True)
+        self.__cleanup()
         
     def download_track(self, track: structs.Track):
         artists = ", ".join(track.track_artists)
-        request_query = f'{artists} - {track.track_name} song HD'
+        request_query = f'{artists} - {track.track_name} song HQ'
 
         savepath = os.path.join(self.download_path, track.track_name)
-        ytdlp_options = self.ytdlp_options
+        ytdlp_options = self.ytdlp_options.copy()
 
         ytdlp_options['outtmpl'] = savepath
-
         with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
             ydl.download([request_query])
-
         self.__change_metadata(savepath, track)
 
-    #has duration filter
+    #has duration filter (kinda)
     def precise_download(self, track: structs.Track):
         artists = ", ".join(track.track_artists)
-        request_query = f'{artists} - {track.track_name} song HD'
+        request_query = f'{artists} - {track.track_name} song'
 
-        ytdlp_options = self.ytdlp_options
+        ytdlp_options = self.ytdlp_options.copy()
 
-        #to get first 10 results, if it was ytsearch then it would give single one only
-        ytdlp_options['default_search'] = 'ytsearch10'
+        # to get first 7 results, if it was ytsearch then it would give single one only
+        # why 7? because 10 was too high, 5 too low, although further finetuning is required
+        ytdlp_options['default_search'] = 'ytsearch7'
 
         duration_s = track.duration_ms // 1000
 
@@ -81,7 +86,7 @@ class Downloader:
                 entries.sort(key=lambda x, dur=duration_s:(abs(x['duration'] - dur), x['view_count']))
 
                 url = entries[0]['webpage_url']
-        
+
         ytdlp_options['default_search'] = 'auto'
 
         savepath = os.path.join(self.download_path, track.track_name)
@@ -92,9 +97,10 @@ class Downloader:
         
         self.__change_metadata(savepath, track)
 
-    def __change_metadata(self, audio_path, track: structs.Track):
+    def __change_metadata(self, audio_path: str, track: structs.Track):
         imgpath = self.__get_album_image(track)
         f = music_tag.load_file(audio_path + '.mp3')
+
         if not f:
             raise(Exception(f'Failed to change metadata for {track.track_name} at {audio_path}'))
         else:
@@ -118,7 +124,8 @@ class Downloader:
     
     def __get_album_image(self, track: structs.Track) -> str:
         if track.album_name not in self.album_covers:
-            filename = track.image_url.split('/')[-1]
+
+            filename = f'{track.album_artists} - {track.album_name}'
             resp = requests.get(track.image_url)
             imgpath = os.path.join(self.download_path, filename) + '.jpg'
 
@@ -130,6 +137,7 @@ class Downloader:
             
             self.album_covers[track.album_name] = imgpath
 
+
         return self.album_covers[track.album_name]
 
     def __cleanup(self):
@@ -137,7 +145,7 @@ class Downloader:
             os.remove(self.album_covers[i])
         self.album_covers = {}
 
-    def __create_dir(self, path):
+    def __create_dir(self, path: str):
         if not os.path.exists(f'{path}'):
             os.mkdir(f'{path}')
   
