@@ -11,7 +11,7 @@ if not env:
     with open('.env', 'w') as f:
         f.write('CLIENT_ID=\nCLIENT_SECRET=')
 
-    print('.env was not detected, creating it - fill in CLIENT_ID and CLIENT_SECRET')
+    print('.env was not detected, creating it - put CLIENT_ID and CLIENT_SECRET in')
     os._exit(1)
 
 parser = cliargs.cli_init()
@@ -31,6 +31,4 @@ precise = args.precise
 workers = args.workers
 
 Connector = Connector(client_id, client_secret, workers)
-print(datetime.now())
 Connector.process(type, link, download_path, precise)
-print(datetime.now())
