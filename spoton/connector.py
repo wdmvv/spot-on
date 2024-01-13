@@ -5,7 +5,7 @@
 import spoton.spotify as spotify
 import spoton.downloader as downloader
 import spoton.structs as structs
-
+import spoton.sideload as sideload
 
 class Connector:
     def __init__(self, client_id: str, client_secret: str, workers: int):
@@ -19,7 +19,7 @@ class Connector:
         self.spotify_obj = spotify.Spotify(client_id, client_secret)
         self.workers = workers
     
-    def process(self, type: str, link: str, download_path: str, precise: bool):
+    def process(self, type: str, link: str, download_path: str, precise: bool, sideload_file):
         download_id = self.get_id(link)
 
         if type == 'playlist':
@@ -33,6 +33,8 @@ class Connector:
             raise(Exception('Invalid download type'))
 
         Downloader = downloader.Downloader(download_path, self.workers)
+        if sideload_file:
+            sideload.load(sideload_file, tracks)
         Downloader.batch_download(tracks, precise)
 
 

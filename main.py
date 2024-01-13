@@ -1,11 +1,9 @@
-import dotenv, os
+import os
+import dotenv as dt
 import cliargs
 from spoton.connector import Connector
 
-
-from datetime import datetime
-
-env = dotenv.load_dotenv()
+env = dt.load_dotenv()
 
 if not env:
     with open('.env', 'w') as f:
@@ -29,6 +27,7 @@ link = args.link
 download_path = args.path
 precise = args.precise
 workers = args.workers
+sideload_file = args.sideload
 
 Connector = Connector(client_id, client_secret, workers)
-Connector.process(type, link, download_path, precise)
+Connector.process(type, link, download_path, precise, sideload_file)

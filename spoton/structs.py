@@ -25,7 +25,11 @@ class Track:
     disk_number: Optional[int] = None
     track_number: Optional[int] = None
     total_tracks: Optional[int] = None
+    content_type: Optional[str] = None
+    content_path: Optional[str] = None
 
+def __sanitize(name: str):
+    return name.replace(",", "").replace(".", "").replace("/", "-").replace("\\", "-")
 
 def tracks_from_playlist(responses: list[dict]) -> list[Track]:
     tracks = []
@@ -37,7 +41,8 @@ def __playlist_tracks_builder(response) -> list[Track]:
     tracks = []
     for item in response['items']:
 
-        name = item['track']['name']
+        name = __sanitize(item['track']['name'])
+
         album_name = item['track']['album']['name']
         image_url = item['track']['album']['images'][0]['url']
         duration_ms = item['track']['duration_ms']
@@ -69,7 +74,7 @@ def tracks_from_album(responses: list[dict], album: Album) -> list[Track]:
 def __album_tracks_builder(response, album: Album) -> list[Track]:
     tracks = []
     for item in response['items']:
-        name = item['name']
+        name = __sanitize(item['track']['name'])
         
         track_number = item['track_number'] if 'track_number' in item else None
         total_tracks = album.total_tracks

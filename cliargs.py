@@ -41,5 +41,12 @@ def cli_init():
         default=5,
         nargs='?'
     )
+
+    parser.add_argument('--sideload',
+        help='Gives ability to specify own link/path for tracks, please refer to the documentation for the format',
+        type=str,
+        nargs='?',
+        default=None
+    )
     
     return parser

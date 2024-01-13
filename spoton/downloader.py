@@ -11,6 +11,7 @@ import spoton.structs as structs
 import yt_dlp
 import music_tag
 import requests
+import shutil
 
 import concurrent.futures as cf
 
@@ -39,23 +40,25 @@ class Downloader:
 
         self.pool = cf.ThreadPoolExecutor(max_workers=workers)
 
-
     def batch_download(self, tracks: list[structs.Track], precise=False):
         download_func = self.download_track
         if precise:
             download_func = self.precise_download
 
         for i in tracks:
-            self.pool.submit(download_func, i)
+            if i.content_path:
+                self.pool.submit(self.__sideload_track, i)
+            else:
+                self.pool.submit(download_func, i)
 
         self.pool.shutdown(wait=True)
         self.__cleanup()
         
     def download_track(self, track: structs.Track):
+        savepath = os.path.join(self.download_path, track.track_name)
         artists = ", ".join(track.track_artists)
         request_query = f'{artists} - {track.track_name} song HQ'
 
-        savepath = os.path.join(self.download_path, track.track_name)
         ytdlp_options = self.ytdlp_options.copy()
 
         ytdlp_options['outtmpl'] = savepath
@@ -139,6 +142,22 @@ class Downloader:
 
 
         return self.album_covers[track.album_name]
+
+    # please do not invoke this function by yourself
+    def __sideload_track(self, track: structs.Track):
+        savepath = os.path.join(self.download_path, track.track_name)
+
+        if track.content_type == "link":
+            ytdlp_options = self.ytdlp_options.copy()
+            ytdlp_options['outtmpl'] = savepath
+
+            with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
+                ydl.download([track.content_path])
+        else:
+            shutil.copy2(track.content_path, savepath + ".mp3")
+            print(track.content_path,savepath)
+        self.__change_metadata(savepath, track)
+
 
     def __cleanup(self):
         for i in self.album_covers:
