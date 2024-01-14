@@ -155,7 +155,6 @@ class Downloader:
                 ydl.download([track.content_path])
         else:
             shutil.copy2(track.content_path, savepath + ".mp3")
-            print(track.content_path,savepath)
         self.__change_metadata(savepath, track)
 
 
