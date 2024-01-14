@@ -15,7 +15,7 @@ You will also have to obtain spotify app client id and secret. To do that go to 
 
 # Usage:
 ```
-python3.11 main.py [-h] [--type type] [--path path] [--precise] [--workers number] link
+python3 main.py [-h] [--type type] [--path path] [--precise] [--workers number] link
 ```
 <ul>
   <li>-h - program help</li>
@@ -30,22 +30,22 @@ python3.11 main.py [-h] [--type type] [--path path] [--precise] [--workers numbe
 
 # Examples:
 ```
-python3.12 main.py --type album --path 'Infinite Hyperdeath' https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
+python3 main.py --type album --path 'Infinite Hyperdeath' https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
 ```
 \- will create folder 'Infinite Hyperdeath' and download album into it
 ```
-python3.12 main.py --precise https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M
+python3 main.py --precise https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M
 ```
 \- will create folder 'Downloads' and download playlist filtered by duration into it
 ```
-python3.12 main.py --sideload sideload.txt https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
+python3 main.py --sideload sideload.txt https://open.spotify.com/album/0eoB2aUIfAk7a6JBLwyZSj
 ```
 \- will use sideload.txt instead of yt search
 
 # More about sideload option:
 It is rather experimental, so it is not that usable (for now?), but it does work as I intended it to. Basically, it is a csv with any extension with ; separator, where each line has 3 parameters: track_name;type;path
 <ul>
-<li>track_name is name of the song you want to sideload. For instance, if you want to sideload "A.U.M.", then you have to put there either "AUM" or "A.U.M.". Do note that both track_name here and inside of spotify processing are sanitized, so . and , are removed, \ and / are replaced with `-`</li>
+<li>track_name is name of the song you want to sideload. For instance, if you want to sideload "Metal Storm/Face the Slayer", then you have to put there either "Metal Storm/Face the Slayer" or "Metal Storm-Face the Slayer". Do note that both track_name here and inside of spotify processing are sanitized, so \ and / are replaced with `-`</li>
 <li>type is a type of sideload - either link (aliases; link, l, url, u), or path (alias: p)</li>
 <li>path is either path or link, based on what you chose. Note that everything unaffected by sideload will be simply downloaded by other means, so either default or precise downloads</li>
 </ul>
