@@ -23,7 +23,7 @@ python3.11 main.py [-h] [--type type] [--path path] [--precise] [--workers numbe
   <li>--path - specify download path, by default creates 'Downloads' dir in workdir</li>
   <li>--precise - enable precise search. It will work slower, but results will be as close to the spotify's ones as possible</li>
   <li>--workers - amount of threads to launch during download, 5 by default</li>
-  <li>--sideload - allows you to specify path or link that you want to use instead of yt search - read more about this below<li>
+  <li>--sideload - allows you to specify path or link that you want to use instead of yt search - read more about this below</li>
   <li>link - spotify playlist/album link, can be either id or link</li>
 </ul>
 
