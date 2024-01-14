@@ -13,8 +13,7 @@ def load(filename: str, playlist: list[structs.Track]):
 
             if not (name and type and whr):
                 continue
-            print("sideloaded!")
-            name = name.replace(",", "").replace(".", "").replace("/", "-").replace("\\", "-")
+            name = name.replace("/", "-").replace("\\", "-")
             if type in {"link", "l", "url", "u"}:
                 type = "link"
             elif type in {"path", "p"}:
