@@ -29,7 +29,7 @@ class Track:
     content_path: Optional[str] = None
 
 def __sanitize(name: str):
-    return name.replace(",", "").replace(".", "").replace("/", "-").replace("\\", "-")
+    return name.replace("/", "-").replace("\\", "-")
 
 def tracks_from_playlist(responses: list[dict]) -> list[Track]:
     tracks = []
